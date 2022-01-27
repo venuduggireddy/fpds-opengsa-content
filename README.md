@@ -2,7 +2,7 @@
 
 Serenity BDD and JUnit 5 project to test FPDS and OpenGSA content integration automation
 
-* Check for `Contant`
+* Check for `Content`
 * Check for `Layout`
 * Check each download href has correct desitination `URLs` 
 * Check each dowloaded file `File Name` matchs with source
