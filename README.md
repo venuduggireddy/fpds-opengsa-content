@@ -14,7 +14,6 @@ Serenity BDD and JUnit 5 project to test FPDS and OpenGSA content integration au
 
 * JDK 1.3 + 
 * Maven 3.6 +
-* Spring tools suite 
 
 ## ChecksumSHA_256
 
