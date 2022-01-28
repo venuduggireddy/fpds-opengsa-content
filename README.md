@@ -1,5 +1,6 @@
 
-[Build Status](https://github.com/venuduggireddy/fpds-opengsa-content/actions/workflows/maven.yml/badge.svg)
+![Build Status](https://github.com/venuduggireddy/fpds-opengsa-content/actions/workflows/maven.yml/badge.svg)
+
 
 # Serenity FPDS OpenGSA Content
 
