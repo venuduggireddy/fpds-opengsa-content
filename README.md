@@ -1,3 +1,6 @@
+
+[Build Status](https://github.com/venuduggireddy/fpds-opengsa-content/actions/workflows/maven.yml/badge.svg)
+
 # Serenity FPDS OpenGSA Content
 
 Serenity BDD and JUnit 5 project to test FPDS and OpenGSA content integration automation
