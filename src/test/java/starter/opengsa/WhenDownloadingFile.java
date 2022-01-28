@@ -9,12 +9,14 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
@@ -22,14 +24,15 @@ import org.openqa.selenium.WebDriver;
 import net.serenitybdd.core.Serenity;
 import net.serenitybdd.junit5.SerenityJUnit5Extension;
 import net.thucydides.core.annotations.Managed;
+import net.thucydides.core.configuration.SessionLocalTempDirectory;
 
 @ExtendWith(SerenityJUnit5Extension.class)
 public class WhenDownloadingFile {
-	
+
 	/**
 	 * Define the webdriver instance to be used for these tests
 	 */
-	@Managed(driver = "chrome", options = "headless")
+	@Managed // (driver = "chrome", options = "headless")
 	WebDriver driver;
 
 	/**
@@ -37,35 +40,34 @@ public class WhenDownloadingFile {
 	 * automatically by Serenity.
 	 */
 	NavigateActions navigate;
-	
+
 	/**
 	 * A page object representing a OpenGsa article that is currently appearing in
 	 * the browser. Page Objects are automatically initialized by Serenity.
 	 */
-	
+
 	OpenGsaPage openGsaPage;
-	
+
 	public static final String FILE_DOWNLAOD_PATH = System.getProperty("user.dir") + "\\downloads\\";
-	
+
 	public static final String OPEN_GSA_OPPS_URL = "https://open.gsa.gov/api/opportunities-api/";
-	
+
 	public static final Map<String, String> FILE_MAP = new HashMap<>();
-	
+
 	static {
-		FILE_MAP.put("Opportunity Management REST Workflow Updated.pdf", "42a9af93c428cb5ff140aa3592931e168509290a3a4814e3853989413e87138c");
+		FILE_MAP.put("Opportunity Management REST Workflow Updated.pdf",
+				"42a9af93c428cb5ff140aa3592931e168509290a3a4814e3853989413e87138c");
 	}
-	
+
 	@Test
 	void verifyDownloadedFileName() {
 		navigate.openPage(OPEN_GSA_OPPS_URL);
 		String sourceUrl = openGsaPage.getHref();
 		String fullFileName = getFullFileNameFromUrl(sourceUrl);
-		Serenity.reportThat("Check the URL file name is same?", 
-				() -> assertThat(FILE_MAP.containsKey(fullFileName)).isTrue()
-		);
-		
-	}
+		Serenity.reportThat("Check the URL file name is same?",
+				() -> assertThat(FILE_MAP.containsKey(fullFileName)).isTrue());
 
+	}
 
 	@Test
 	void downloadFile() {
@@ -75,26 +77,47 @@ public class WhenDownloadingFile {
 		String fullFileName = getFullFileNameFromUrl(sourceUrl);
 		String destination = FILE_DOWNLAOD_PATH + fullFileName;
 		downloadFileFromUrl(sourceUrl, destination);
-		Serenity.reportThat("Check if the new file is downloaded", 
-				() -> assertThat(FileUtils.isFileNewer(new File(destination), date)).isTrue()
-		);
-	
+		Serenity.reportThat("Check if the new file is downloaded",
+				() -> assertThat(FileUtils.isFileNewer(new File(destination), date)).isTrue());
+
 	}
-	
-	
+
 	@Test
 	void verifyFileChecksum_SHA256() {
-		
+
 		navigate.openPage(OPEN_GSA_OPPS_URL);
 		String sourceUrl = openGsaPage.getHref();
 		String fullFileName = getFullFileNameFromUrl(sourceUrl);
 		String destination = FILE_DOWNLAOD_PATH + fullFileName;
-		
-		Serenity.reportThat("Check if downloaded file has the same SHA256 checksum", 
-				() -> assertThat(getFileChecksumSHA256(destination)).isEqualTo(FILE_MAP.get(fullFileName))
-		);
+
+		Serenity.reportThat("Check if downloaded file has the same SHA256 checksum",
+				() -> assertThat(getFileChecksumSHA256(destination)).isEqualTo(FILE_MAP.get(fullFileName)));
 	}
 
+	@Test
+	public void classicDownload() {
+		
+		navigate.openPage(OPEN_GSA_OPPS_URL);
+		String sourceUrl = openGsaPage.getHref();
+		String fullFileName = getFullFileNameFromUrl(sourceUrl);
+		
+		// Download the file
+		 openGsaPage.getDownloadLink().click();
+		 
+		File downloadedFile = SessionLocalTempDirectory
+								.forTheCurrentSession()
+								.resolve("downloads/" + fullFileName)
+								.toFile();
+
+		
+		Awaitility.await().atMost(10, TimeUnit.SECONDS).until(downloadedFile::exists);
+		
+		//System.out.println(downloadedFile.getAbsolutePath());
+
+		// Check that the file exists...
+		assertThat(downloadedFile).exists();
+
+	}
 
 	private static String getFullFileNameFromUrl(String sourceUrl) {
 
@@ -113,12 +136,12 @@ public class WhenDownloadingFile {
 	private static void downloadFileFromUrl(String sourceUrl, String destination) {
 
 		int CONNECT_TIMEOUT = 10000;
-        int READ_TIMEOUT = 10000;
-        try {
-            FileUtils.copyURLToFile(new URL(sourceUrl), new File(destination), CONNECT_TIMEOUT, READ_TIMEOUT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		int READ_TIMEOUT = 10000;
+		try {
+			FileUtils.copyURLToFile(new URL(sourceUrl), new File(destination), CONNECT_TIMEOUT, READ_TIMEOUT);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static String getFileChecksumSHA256(String destination) {
