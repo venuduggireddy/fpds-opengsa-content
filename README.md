@@ -19,7 +19,7 @@ Serenity BDD and JUnit 5 project to test FPDS and OpenGSA content integration au
 
 Generating file checksum online [ChecksumSHA_256](https://emn178.github.io/online-tools/sha256_checksum.html)
 
-<a href="https://emn178.github.io/online-tools/sha256_checksum.html" target="_blank" rel="noopener">ChecksumSHA_256</a>
+<a href="https://emn178.github.io/online-tools/sha256_checksum.html" target="_blank">ChecksumSHA_256</a>
 
 ## Running the tests under Maven
 
